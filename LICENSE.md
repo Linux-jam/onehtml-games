@@ -9,4 +9,4 @@ You can freely use, modify, and distribute this software under the terms of eith
 - **Source code disclosure**: If you distribute this software (modified or unmodified), you must provide the full source code.
 - **Copyleft**: Derivative works must be licensed under the same GPL terms.
 
-For details, see the [full license text](./LICENSE).
+For details, see the [full license text](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
