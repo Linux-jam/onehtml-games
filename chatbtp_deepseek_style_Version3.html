@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ChatBTP - ブッチッパチャット</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Meiryo', 'Noto Sans JP', sans-serif;
+      background: #232433;
+      color: #fff;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 270px;
+      min-width: 180px;
+      background: #26273a;
+      color: #babac2;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      height: 100vh;
+      box-shadow: 2px 0 8px #14141830;
+    }
+    .sidebar .logo {
+      font-size: 2em;
+      font-weight: bold;
+      color: #a4a6ff;
+      padding: 32px 0 20px 36px;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+    .sidebar .new-chat-btn {
+      margin: 0 24px 24px 24px;
+      padding: 12px 0;
+      background: #4b50fa;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-align: center;
+    }
+    .sidebar .new-chat-btn:hover {
+      background: #373be3;
+    }
+    .sidebar .history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 26px;
+      margin-bottom: 24px;
+    }
+    .sidebar .history-entry {
+      padding: 11px 0 11px 10px;
+      border-radius: 8px;
+      margin-bottom: 3px;
+      cursor: pointer;
+      transition: background 0.13s;
+    }
+    .sidebar .history-entry:hover {
+      background: #343552;
+      color: #fff;
+    }
+    .sidebar .profile {
+      border-top: 1px solid #32344b;
+      padding: 22px 0 14px 28px;
+      font-size: 1em;
+      color: #9fa1c0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar .profile-icon {
+      width: 32px;
+      height: 32px;
+      background: #5d5ed8;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-right: 6px;
+    }
+
+    .main {
+      flex: 1;
+      background: #232433;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-width: 0;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .main-header {
+      text-align: center;
+      margin-top: 60px;
+      margin-bottom: 30px;
+      color: #a5a5b5;
+    }
+    .main-header .main-logo {
+      color: #6ac3fe;
+      font-size: 2.3em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .main-header .main-title {
+      font-size: 2em;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+    .main-header .main-desc {
+      font-size: 1.05em;
+      margin-bottom: 5px;
+      color: #b2b2c8;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      min-width: 0;
+      padding-bottom: 110px;
+      overflow: hidden;
+    }
+    .chat-messages {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 0 24px 0 24px;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+    .message {
+      max-width: 95%;
+      padding: 13px 18px;
+      border-radius: 15px;
+      font-size: 1.13em;
+      word-break: break-word;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      box-sizing: border-box;
+      position: relative;
+      margin-bottom: 6px;
+    }
+    .message.user {
+      background: #4b50fa;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 6px;
+      margin-left: 8%;
+      text-align: right;
+      word-break: break-word;
+    }
+    .message.bot {
+      background: #ffe55c;
+      color: #232433;
+      align-self: flex-start;
+      border-bottom-left-radius: 6px;
+      margin-right: 8%;
+      word-break: break-word;
+    }
+
+    .chat-input-area {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      width: 100vw;
+      max-width: 100vw;
+      background: #232433cc;
+      padding: 24px 0 14px 0;
+      display: flex;
+      justify-content: center;
+      z-index: 10;
+      border-top: 1px solid #32344b;
+      backdrop-filter: blur(2px);
+    }
+    .chat-input-inner {
+      width: 100%;
+      max-width: 660px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1.13em;
+      background: #31334d;
+      color: #fff;
+      outline: none;
+      min-width: 0;
+    }
+    .chat-send {
+      background: #45e86d;
+      color: #232433;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-size: 1.07em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chat-send:hover {
+      background: #2fd45b;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 60px;
+        min-width: 52px;
+        padding: 0;
+      }
+      .sidebar .logo, .sidebar .history, .sidebar .profile {
+        display: none;
+      }
+      .sidebar .new-chat-btn {
+        width: 40px;
+        margin: 20px auto;
+        font-size: 0.8em;
+        padding: 8px 0;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .main-header {
+        margin-top: 20px;
+        margin-bottom: 15px;
+      }
+      .chat-area {
+        padding-bottom: 88px;
+      }
+      .chat-messages {
+        max-width: 99vw;
+        padding: 0 4vw;
+      }
+      .chat-input-inner {
+        max-width: 98vw;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .sidebar {
+        display: none;
+      }
+      .main-header {
+        margin-top: 8px;
+        font-size: 1.1em;
+      }
+      .chat-messages {
+        padding: 0 2vw;
+        font-size: 0.98em;
+      }
+      .chat-input-area {
+        padding: 10px 0 6px 0;
+      }
+      .chat-input-inner {
+        max-width: 99vw;
+      }
+      .chat-input {
+        font-size: 1em;
+      }
+      .chat-send {
+        font-size: 0.98em;
+        padding: 10px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">btp</div>
+    <button class="new-chat-btn" onclick="location.reload()">New chat</button>
+    <div class="history">
+      <div class="history-entry">「ブッチッパ」しか返さないやつ</div>
+      <div class="history-entry">チャットBTP誕生！</div>
+    </div>
+    <div class="profile">
+      <span class="profile-icon">Y</span>
+      <span>My Profile</span>
+    </div>
+  </div>
+  <div class="main">
+    <div class="main-header">
+      <div class="main-logo">🦏</div>
+      <div class="main-title">Hi, I'm ChatBTP.</div>
+      <div class="main-desc">なんでも送っても「ブッチッパ」しか返さないジョークAI</div>
+    </div>
+    <div class="chat-area">
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+    <form class="chat-input-area" id="chat-form" autocomplete="off">
+      <div class="chat-input-inner">
+        <input type="text" class="chat-input" id="user-input" placeholder="なんでも送ってみ？" autofocus />
+        <button type="submit" class="chat-send">送信</button>
+      </div>
+    </form>
+  </div>
+  <script>
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+
+    function appendMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ' + sender;
+      msgDiv.textContent = text;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const text = userInput.value.trim();
+      if (!text) return;
+      appendMessage(text, 'user');
+      userInput.value = '';
+      setTimeout(() => {
+        const rand = Math.floor(Math.random() * 50) + 1;
+        // 画面幅に合わせて自動折り返し、見やすいように適度に改行
+        let buchi = '';
+        for (let i = 0; i < rand; i++) {
+          buchi += 'ブッチッパ';
+          if ((i + 1) % 8 === 0 && i !== rand - 1) buchi += '\n';
+        }
+        appendMessage(buchi, 'bot');
+      }, 400);
+    });
+  </script>
+</body>
+</html>
